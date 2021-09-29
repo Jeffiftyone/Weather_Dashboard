@@ -1,4 +1,3 @@
-let APIKey = "8302e357ef6f3efbd2c823a27786e610";
 
 //current weather
 //api.openweathermap.org/data/2.5/weather?q={city name},{state code}&appid={API key}
@@ -7,6 +6,13 @@ let APIKey = "8302e357ef6f3efbd2c823a27786e610";
 //api.openweathermap.org/data/2.5/forecast?q={city name},{state code},{country code}&appid={API key}
 
 let testStr='{"coord":{"lon":-87.65,"lat":41.85},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":293.52,"feels_like":293.07,"temp_min":291.03,"temp_max":296.71,"pressure":1016,"humidity":56},"visibility":10000,"wind":{"speed":1.79,"deg":84,"gust":3.58},"clouds":{"all":1},"dt":1632868539,"sys":{"type":2,"id":2005153,"country":"US","sunrise":1632829469,"sunset":1632872262},"timezone":-18000,"id":4887398,"name":"Chicago","cod":200}';
+let mainCity=$('#main-city');
+let mainDate=$('#main-date');
+let mainTemp=$('#main-temp');
+let mainWind=$('#main-wind');
+let mainHumidity=$('#main-hum');
+let uv=$('#uv-index');
+
 
 let search=$('#search');
 let searchButton =$('#search-button');
@@ -21,6 +27,7 @@ function searchCity(){
     //checks for valid search parameters
     if (!search.val() || /^\s*$/.test(search.val())){
         console.log("invalid")
+        alert("search cannot be empty")
     }
     else{
         console.log("fetch city");
@@ -35,7 +42,7 @@ function searchCity(){
 function getCurrentWeatherApi(city){
    //get data from api
     let requestUrl="https://api.openweathermap.org/data/2.5/weather?q=";
-    let APIKey= "&appid=d91f911bcf2c0f925fb6535547a5ddc9";
+    let APIKey= "&appid=8302e357ef6f3efbd2c823a27786e610";
     let newUrl= requestUrl.concat(city,APIKey)
 
     fetch(newUrl)
@@ -44,12 +51,23 @@ function getCurrentWeatherApi(city){
     })
     .then(function (data){
         console.log(data);
+    //city
+    mainCity.text(data.name+"-");
+    //date
+    let today = new Date().toLocaleDateString();
+    mainDate.text(today);
+    //Weather Icon here
     //temp
+    let temperature=convertTemperature(data.main.temp);
+    mainTemp.text("Temperature "+temperature);
     console.log("temperature: "+ data.main.temp);
     //wind
+    let wind=convertWind(data.wind.speed);
+    mainWind.text("Wind: "+wind);
     console.log("wind: "+ data.wind.speed);
     //humidity
-    console.log("humidity: "+ data.main.humidity);
+    mainHumidity.text("Humidity: "+ data.main.humidity +"%");
+    console.log("Humidity: "+ data.main.humidity +"%");
     //UV index
         //need to fetch data from different service under openweather, current does not include UV index
         // get lat and lon parameters for new call
@@ -65,6 +83,7 @@ function getCurrentWeatherApi(city){
         .then(function (data2){
             console.log(data2);
             //UV index
+            UVindex(data2.current.uvi);
             console.log("UV-index: "+ data2.current.uvi);
             //generate UV index label
             //also get the daily forecast for the next 5 days
@@ -144,7 +163,30 @@ return;
 
 }
 
+function convertTemperature(temp){
+    //converts kelvins to celsius
+    temp=parseFloat((temp-275.15).toFixed(1)) +" °C";
+    return temp;
+}
+function convertWind(wind){
+    //converts mph to km/h
+    wind=parseFloat((wind*1.60934).toFixed(2))+ " km/h";
+    return wind;
+}
 
+function UVindex(index){
+    
+    if (index<=2){
+        uv.addClass("text-success");
+    }
+    if (index>5){
+        uv.addClass("text-danger");
+    }
+    if (index> 2&& index<5){
+        uv.addClass("text-warning");
+    }
+    uv.text('UV-index: '+ index);
+}
 function check(){
     input=search.val();
     console.log(input);
