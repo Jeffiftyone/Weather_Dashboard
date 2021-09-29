@@ -13,7 +13,6 @@ let mainWind=$('#main-wind');
 let mainHumidity=$('#main-hum');
 let uv=$('#uv-index');
 
-
 let search=$('#search');
 let searchButton =$('#search-button');
 let input="";
@@ -38,7 +37,6 @@ function searchCity(){
     }
 }
 
-
 function getCurrentWeatherApi(city){
    //get data from api
     let requestUrl="https://api.openweathermap.org/data/2.5/weather?q=";
@@ -55,7 +53,7 @@ function getCurrentWeatherApi(city){
     mainCity.text(data.name+"-");
     //date
     let today = new Date().toLocaleDateString();
-    mainDate.text(today);
+    mainDate.text("("+today+")");
     //Weather Icon here
     //temp
     let temperature=convertTemperature(data.main.temp);
@@ -145,6 +143,7 @@ function fiveDayForecast(data2){
 //populates the search history once search button is clicked
 function addHistory(search){
     let temp=document.getElementById(search);
+    let searchHistory =JSON.parse(localStorage.getItem('searches'));
   if (!temp){
     histButton = document.createElement('button');
     histButton.value=search;
@@ -153,13 +152,39 @@ function addHistory(search){
     histButton.textContent=search;
     $(histButton).on('click',function(){
         getCurrentWeatherApi(this.value);
-    })
+    });
     history.append(histButton);
+    searchHistory.push(histButton.value);
+    localStorage.setItem('searches',JSON.stringify(searchHistory));
   }
   else{
     console.log("button already exists");
+    console.log(searchHistory);
   }
 return;
+}
+
+function populateHistory(){
+    let storedHistory =JSON.parse(localStorage.getItem('searches'));
+    if (!storedHistory){
+        //do nothing if there is no history
+        }
+        else{
+            for(i=0;i<storedHistory.length;i++){
+                let histButton = document.createElement('button');
+                histButton.value=storedHistory[i];
+                histButton.setAttribute('id',storedHistory[i]); 
+                histButton.setAttribute('class','search-history');
+                histButton.textContent=storedHistory[i];
+                $(histButton).on('click',function(){
+                    getCurrentWeatherApi(this.value);
+                })
+                history.append(histButton);
+                
+        }
+    }
+   
+   
 
 }
 
@@ -188,10 +213,9 @@ function UVindex(index){
     uv.text('UV-index: '+ index);
 }
 function check(){
-    input=search.val();
-    console.log(input);
+    console.log();
 }
-
+populateHistory();
 // document.querySelector('.search-history').addEventListener('click', function(){
 //     getCurrentWeatherApi(this.value);
 // });
