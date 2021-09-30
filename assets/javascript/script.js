@@ -141,10 +141,14 @@ function fiveDayForecast(data2){
                 }];
 
                 for (i=0;i<=4;i++){
+                  
+                    //make cards on screen
                     dailyForcast[i].status=data2.daily[i+1].weather[0].main;
                     dailyForcast[i].temp=data2.daily[i+1].temp.day;
                     dailyForcast[i].wind=data2.daily[i+1].wind_speed;
                     dailyForcast[i].humidity=data2.daily[i+1].humidity;
+
+                    let card=document.createElement('p');
                 }
                 console.log(dailyForcast);
                 //generate cards
@@ -154,7 +158,7 @@ function fiveDayForecast(data2){
 function addHistory(search){
     let temp=document.getElementById(search);
     
-    //searchHistory=JSON.parse(localStorage.getItem('searches'));
+    searchHistory=JSON.parse(localStorage.getItem('searches'));
   
 
     if (!temp){
