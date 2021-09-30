@@ -4,8 +4,6 @@
 
 //5 day forecast
 //api.openweathermap.org/data/2.5/forecast?q={city name},{state code},{country code}&appid={API key}
-
-let testStr='{"coord":{"lon":-87.65,"lat":41.85},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":293.52,"feels_like":293.07,"temp_min":291.03,"temp_max":296.71,"pressure":1016,"humidity":56},"visibility":10000,"wind":{"speed":1.79,"deg":84,"gust":3.58},"clouds":{"all":1},"dt":1632868539,"sys":{"type":2,"id":2005153,"country":"US","sunrise":1632829469,"sunset":1632872262},"timezone":-18000,"id":4887398,"name":"Chicago","cod":200}';
 let mainCity=$('#main-city');
 let mainDate=$('#main-date');
 let mainTemp=$('#main-temp');
@@ -54,7 +52,8 @@ function getCurrentWeatherApi(city){
     //date
     let today = new Date().toLocaleDateString();
     mainDate.text("("+today+")");
-    //Weather Icon here
+    //Weather Icon 
+    
     //temp
     let temperature=convertTemperature(data.main.temp);
     mainTemp.text("Temperature "+temperature);
@@ -143,7 +142,8 @@ function fiveDayForecast(data2){
 //populates the search history once search button is clicked
 function addHistory(search){
     let temp=document.getElementById(search);
-    let searchHistory =JSON.parse(localStorage.getItem('searches'));
+    
+    searchHistory=JSON.parse(localStorage.getItem('searches'));
   if (!temp){
     histButton = document.createElement('button');
     histButton.value=search;
@@ -154,7 +154,13 @@ function addHistory(search){
         getCurrentWeatherApi(this.value);
     });
     history.append(histButton);
-    searchHistory.push(histButton.value);
+    if (!searchHistory){
+        //if history is null, set empty array
+        searchHistory=[];
+    }
+    else{
+        searchHistory.push(histButton.value);
+    }
     localStorage.setItem('searches',JSON.stringify(searchHistory));
   }
   else{
