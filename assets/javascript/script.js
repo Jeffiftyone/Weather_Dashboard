@@ -29,7 +29,7 @@ function searchCity(){
     else{
         console.log("fetch city");
         getCurrentWeatherApi(search.val());
-        
+             
 
     }
 }
@@ -47,10 +47,10 @@ function getCurrentWeatherApi(city){
         //check for good api response
         if (!response.ok) {
          alert("invalid city name");
+         return;
         }
         else{
-             //add to search history
-            addHistory(search.val());
+ 
             return response.json();
         }
     })
@@ -92,15 +92,14 @@ function getCurrentWeatherApi(city){
             //UV index
             UVindex(data2.current.uvi);
             console.log("UV-index: "+ data2.current.uvi);
-            //generate UV index label
-            //also get the daily forecast for the next 5 days
+  
             console.log(data2.daily[0].weather[0].main);
             fiveDayForecast(data2);
-        //   console.log(data2.daily[0].weather[0].main,
-        //           data2.daily[0].temp.day,
-        //             data2.daily[0].wind_speed,data2.daily[0].humidity);
+   
 
         });
+        //add to search history
+        addHistory(search.val());
     });
 }
 
@@ -168,6 +167,7 @@ function addHistory(search){
     if (!searchHistory){
         //if history is null, set empty array
         searchHistory=[];
+        searchHistory.push(histButton.value);
     }
     else{
         searchHistory.push(histButton.value);
