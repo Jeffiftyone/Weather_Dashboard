@@ -29,24 +29,34 @@ function searchCity(){
     else{
         console.log("fetch city");
         getCurrentWeatherApi(search.val());
-        //add to search history
-         addHistory(search.val());
+        
 
     }
 }
 
 function getCurrentWeatherApi(city){
    //get data from api
+    
     let requestUrl="https://api.openweathermap.org/data/2.5/weather?q=";
     let APIKey= "&appid=8302e357ef6f3efbd2c823a27786e610";
     let newUrl= requestUrl.concat(city,APIKey)
 
+   
     fetch(newUrl)
     .then(function (response) {
-      return response.json();
+        //check for good api response
+        if (!response.ok) {
+         alert("invalid city name");
+        }
+        else{
+             //add to search history
+            addHistory(search.val());
+            return response.json();
+        }
     })
     .then(function (data){
         console.log(data);
+    
     //city
     mainCity.text(data.name+"-");
     //date
@@ -145,6 +155,7 @@ function addHistory(search){
     
     searchHistory=JSON.parse(localStorage.getItem('searches'));
   if (!temp){
+
     histButton = document.createElement('button');
     histButton.value=search;
     histButton.setAttribute('id',histButton.value); 
@@ -189,9 +200,6 @@ function populateHistory(){
                 
         }
     }
-   
-   
-
 }
 
 function convertTemperature(temp){
