@@ -29,7 +29,8 @@ function searchCity(){
     else{
         console.log("fetch city");
         getCurrentWeatherApi(search.val());
-             
+          //add to search history
+          addHistory(search.val());
 
     }
 }
@@ -50,7 +51,7 @@ function getCurrentWeatherApi(city){
          return;
         }
         else{
- 
+            
             return response.json();
         }
     })
@@ -98,9 +99,10 @@ function getCurrentWeatherApi(city){
    
 
         });
-        //add to search history
-        addHistory(search.val());
+          
+             
     });
+
 }
 
 function fiveDayForecast(data2){
@@ -152,27 +154,33 @@ function fiveDayForecast(data2){
 function addHistory(search){
     let temp=document.getElementById(search);
     
-    searchHistory=JSON.parse(localStorage.getItem('searches'));
-  if (!temp){
+    //searchHistory=JSON.parse(localStorage.getItem('searches'));
+  
 
+    if (!temp){
     histButton = document.createElement('button');
     histButton.value=search;
     histButton.setAttribute('id',histButton.value); 
     histButton.setAttribute('class','search-history');
     histButton.textContent=search;
+    console.log("created button, id: "+histButton.value);
     $(histButton).on('click',function(){
-        getCurrentWeatherApi(this.value);
+        
+            getCurrentWeatherApi(this.value);
+        
     });
+    //searchHistory.push(histButton.value);
+
     history.append(histButton);
     if (!searchHistory){
-        //if history is null, set empty array
-        searchHistory=[];
-        searchHistory.push(histButton.value);
+        //if history is null, set first element
+        searchHistory=[histButton.value];
     }
     else{
         searchHistory.push(histButton.value);
     }
     localStorage.setItem('searches',JSON.stringify(searchHistory));
+   
   }
   else{
     console.log("button already exists");
@@ -201,6 +209,8 @@ function populateHistory(){
         }
     }
 }
+
+
 
 function convertTemperature(temp){
     //converts kelvins to celsius
