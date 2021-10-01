@@ -1,0 +1,19 @@
+h4{
+  padding: 10px;  
+}
+.info-main{
+    padding-left: 10px;
+}
+.search-history{
+    display: block;
+    width:100%;
+    padding: 5px;
+}
+.weather-card{
+    width: 140px;
+    padding: 10px;
+    display: inline-block;
+}
+.headline-main{
+    display:inline-block;
+}

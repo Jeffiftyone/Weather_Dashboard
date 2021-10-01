@@ -9,6 +9,7 @@ let mainDate=$('#main-date');
 let mainTemp=$('#main-temp');
 let mainWind=$('#main-wind');
 let mainHumidity=$('#main-hum');
+let mainIconDiv=document.getElementById('main-icon');
 let uv=$('#uv-index');
 
 let search=$('#search');
@@ -17,54 +18,60 @@ let input="";
 let history=$(".history");
 let searchHistory=[];
 let histCount=0;
-
+let requestUrl="https://api.openweathermap.org/data/2.5/weather?q=";
+let APIKey= "&appid=8302e357ef6f3efbd2c823a27786e610";
+let fiveDayDiv=document.getElementById('forecast');
 
 //Check if search is valid
-function searchCity(){
+function searchCity(city){
     //checks for valid search parameters
-    if (!search.val() || /^\s*$/.test(search.val())){
+    if (!city || /^\s*$/.test(city)){
         console.log("invalid")
         alert("search cannot be empty")
     }
     else{
+        let newUrl= requestUrl.concat(city,APIKey);
+        fetch(newUrl).then(function(response) {
+            if (!response.ok) {
+                // make the promise be rejected if we didn't get a valid
+                alert('invalid city name');
+                throw new Error("Not 2xx response");  
+            } else {
+                getCurrentWeatherApi(city);
+                //add to search history
+                addHistory(city);
+      
+            }
+        }).catch(function(err) {
+            // some error here
+        });
         console.log("fetch city");
-        getCurrentWeatherApi(search.val());
-          //add to search history
-          addHistory(search.val());
-
+        console.log(getCurrentWeatherApi(search.val()));
+     
     }
 }
 
 function getCurrentWeatherApi(city){
    //get data from api
-    
-    let requestUrl="https://api.openweathermap.org/data/2.5/weather?q=";
-    let APIKey= "&appid=8302e357ef6f3efbd2c823a27786e610";
-    let newUrl= requestUrl.concat(city,APIKey)
-
-   
+   let newUrl= requestUrl.concat(city,APIKey);
     fetch(newUrl)
     .then(function (response) {
-        //check for good api response
-        if (!response.ok) {
-         alert("invalid city name");
-         return;
-        }
-        else{
-            
             return response.json();
-        }
     })
     .then(function (data){
         console.log(data);
     
     //city
-    mainCity.text(data.name+"-");
+    mainCity.text(data.name);
     //date
     let today = new Date().toLocaleDateString();
     mainDate.text("("+today+")");
     //Weather Icon 
-    
+    let mainIcon=document.createElement('img');
+    let iconCode=data.weather[0].icon;
+    let iconLink="http://openweathermap.org/img/w/"+iconCode+".png"
+    mainIcon.setAttribute('src',iconLink);
+    mainIconDiv.appendChild(mainIcon);
     //temp
     let temperature=convertTemperature(data.main.temp);
     mainTemp.text("Temperature "+temperature);
@@ -96,11 +103,7 @@ function getCurrentWeatherApi(city){
   
             console.log(data2.daily[0].weather[0].main);
             fiveDayForecast(data2);
-   
-
         });
-          
-             
     });
 
 }
@@ -108,59 +111,46 @@ function getCurrentWeatherApi(city){
 function fiveDayForecast(data2){
                 //also get the daily forecast for the next 5 days
                 console.log("daily");
-                //array for 5 days
-                let dailyForcast=[{
-                    status:"",
-                    temp:"",
-                    wind:"",
-                    humidity:""
-                },
-                {
-                    status:"",
-                    temp:"",
-                    wind:"",
-                    humidity:""
-                },
-                {
-                    status:"",
-                    temp:"",
-                    wind:"",
-                    humidity:""
-                },
-                {
-                    status:"",
-                    temp:"",
-                    wind:"",
-                    humidity:""
-                },
-                {
-                    status:"",
-                    temp:"",
-                    wind:"",
-                    humidity:""
-                }];
-
-                for (i=0;i<=4;i++){
-                  
+                
+                for (i=1;i<=5;i++){
                     //make cards on screen
-                    dailyForcast[i].status=data2.daily[i+1].weather[0].main;
-                    dailyForcast[i].temp=data2.daily[i+1].temp.day;
-                    dailyForcast[i].wind=data2.daily[i+1].wind_speed;
-                    dailyForcast[i].humidity=data2.daily[i+1].humidity;
+                    let fcCard=document.createElement('div');
+                    fcCard.setAttribute('class','weather-card');
+                    //date
+                    let fcDate=document.createElement('h6');
+                    let futureDate= new Date();
+                    fcDate.textContent=(futureDate.addDays(i).toLocaleDateString());
+                    fcCard.appendChild(fcDate);
+                    //icon
+                    let fcIcon=document.createElement('img');
+                    let iconCode=data2.daily[i].weather[0].icon
+                    let iconLink="http://openweathermap.org/img/w/"+iconCode+".png"
+                    fcIcon.setAttribute('src',iconLink);
+                    fcCard.appendChild(fcIcon);
+                    //temperature
+                    let fcTemp=document.createElement('p');
+                    fcTemp.textContent=data2.daily[i].temp.day;
+                    fcCard.appendChild(fcTemp);
+                    //wind
+                    let fcWind=document.createElement('p');
+                    fcWind.textContent=data2.daily[i].wind_speed;
+                    fcCard.appendChild(fcWind);
+                    //humidity
+                    let fcHum=document.createElement('p');
+                    fcHum.textContent=data2.daily[i].humidity;
+                    fcCard.appendChild(fcHum);
 
-                    let card=document.createElement('p');
+                    fiveDayDiv.appendChild(fcCard);
+
                 }
-                console.log(dailyForcast);
-                //generate cards
+ 
 }
 
 //populates the search history once search button is clicked
 function addHistory(search){
     let temp=document.getElementById(search);
-    
+    //get from local storage first
     searchHistory=JSON.parse(localStorage.getItem('searches'));
-  
-
     if (!temp){
     histButton = document.createElement('button');
     histButton.value=search;
@@ -173,8 +163,7 @@ function addHistory(search){
             getCurrentWeatherApi(this.value);
         
     });
-    //searchHistory.push(histButton.value);
-
+   
     history.append(histButton);
     if (!searchHistory){
         //if history is null, set first element
@@ -243,11 +232,18 @@ function UVindex(index){
 function check(){
     console.log();
 }
+//add days to date 
+Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
 populateHistory();
 // document.querySelector('.search-history').addEventListener('click', function(){
 //     getCurrentWeatherApi(this.value);
 // });
 
 searchButton.click(function(){
-    searchCity();
+    searchCity(search.val());
 });
