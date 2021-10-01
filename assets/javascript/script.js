@@ -1,16 +1,10 @@
-
-//current weather
-//api.openweathermap.org/data/2.5/weather?q={city name},{state code}&appid={API key}
-
-//5 day forecast
-//api.openweathermap.org/data/2.5/forecast?q={city name},{state code},{country code}&appid={API key}
 let mainCity=$('#main-city');
 let mainDate=$('#main-date');
 let mainTemp=$('#main-temp');
 let mainWind=$('#main-wind');
 let mainHumidity=$('#main-hum');
 let mainIconDiv=document.getElementById('main-icon');
-let uv=$('#uv-index');
+let uv=document.getElementById('uv-index');
 
 let search=$('#search');
 let searchButton =$('#search-button');
@@ -19,7 +13,7 @@ let history=$(".history");
 let searchHistory=[];
 let histCount=0;
 let requestUrl="https://api.openweathermap.org/data/2.5/weather?q=";
-let APIKey= "&appid=8302e357ef6f3efbd2c823a27786e610";
+let APIKey= "&appid=a30a9e9668adde12691208802e62575c";
 let fiveDayDiv=document.getElementById('forecast');
 
 //Check if search is valid
@@ -66,6 +60,8 @@ function getCurrentWeatherApi(city){
     //date
     let today = new Date().toLocaleDateString();
     mainDate.text("("+today+")");
+    //wipe old icon
+    mainIconDiv.innerHTML="";
     //Weather Icon 
     let mainIcon=document.createElement('img');
     let iconCode=data.weather[0].icon;
@@ -109,6 +105,8 @@ function getCurrentWeatherApi(city){
 }
 
 function fiveDayForecast(data2){
+               //wipe old content
+                fiveDayDiv.innerHTML="";
                 //also get the daily forecast for the next 5 days
                 console.log("daily");
                 
@@ -129,15 +127,15 @@ function fiveDayForecast(data2){
                     fcCard.appendChild(fcIcon);
                     //temperature
                     let fcTemp=document.createElement('p');
-                    fcTemp.textContent=data2.daily[i].temp.day;
+                    fcTemp.textContent= convertTemperature(data2.daily[i].temp.day);
                     fcCard.appendChild(fcTemp);
                     //wind
                     let fcWind=document.createElement('p');
-                    fcWind.textContent=data2.daily[i].wind_speed;
+                    fcWind.textContent= convertWind(data2.daily[i].wind_speed);
                     fcCard.appendChild(fcWind);
                     //humidity
                     let fcHum=document.createElement('p');
-                    fcHum.textContent=data2.daily[i].humidity;
+                    fcHum.textContent=data2.daily[i].humidity + "%";
                     fcCard.appendChild(fcHum);
 
                     fiveDayDiv.appendChild(fcCard);
@@ -217,21 +215,21 @@ function convertWind(wind){
 }
 
 function UVindex(index){
-    
+    uv.innerHTML="";
+    let uvContent=document.createElement('p')
     if (index<=2){
-        uv.addClass("text-success");
+        uvContent.setAttribute('class','text-success')
     }
     if (index>5){
-        uv.addClass("text-danger");
+        uvContent.setAttribute('class',"text-danger");
     }
     if (index> 2&& index<5){
-        uv.addClass("text-warning");
+        uvContent.setAttribute('class',"text-warning");
     }
-    uv.text('UV-index: '+ index);
+    uvContent.textContent='UV-index: '+ index;
+    uv.appendChild(uvContent);
 }
-function check(){
-    console.log();
-}
+
 //add days to date 
 Date.prototype.addDays = function(days) {
     var date = new Date(this.valueOf());
@@ -240,9 +238,6 @@ Date.prototype.addDays = function(days) {
 }
 
 populateHistory();
-// document.querySelector('.search-history').addEventListener('click', function(){
-//     getCurrentWeatherApi(this.value);
-// });
 
 searchButton.click(function(){
     searchCity(search.val());
